@@ -99,7 +99,7 @@ async def get_token_accounts(owner: str, mint: Optional[str] = None) -> Dict[str
             resp = client.get_token_accounts_by_owner(owner_pk, opts)
         else:
             from solana.rpc.types import TokenAccountOpts
-            opts = TokenAccountOpts(program_id=_pubkey(TOKEN_PROGRAM))
+            opts = TokenAccountOpts(program_id=_pubkey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"))
             resp = client.get_token_accounts_by_owner(owner_pk, opts)
 
         accounts = []
@@ -328,8 +328,8 @@ async def get_mint_info(mint: str) -> Dict[str, Any]:
         data = bytes(acct.data)
         owner = str(acct.owner)
 
-        is_token = owner == TOKEN_PROGRAM
-        is_token_2022 = owner == TOKEN_2022_PROGRAM
+        is_token = owner == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        is_token_2022 = owner == "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         if not is_token and not is_token_2022:
             return _err(f"Account {mint} is not a token mint (owner: {owner})")
 
@@ -361,12 +361,13 @@ async def decode_token_metadata(mint: str) -> Dict[str, Any]:
     """Decode Metaplex token metadata (name, symbol, uri) for a token mint."""
     try:
         # Derive metadata PDA
+        metaplex_program = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
         seeds = [
             b"metadata",
-            bytes(_pubkey(METAPLEX_METADATA_PROGRAM)),
+            bytes(_pubkey(metaplex_program)),
             bytes(_pubkey(mint)),
         ]
-        metadata_addr, _ = Pubkey.find_program_address(seeds, _pubkey(METAPLEX_METADATA_PROGRAM))
+        metadata_addr, _ = Pubkey.find_program_address(seeds, _pubkey(metaplex_program))
 
         resp = client.get_account_info(metadata_addr)
         acct = resp.value
@@ -452,7 +453,7 @@ async def decode_instruction(instruction_data_base58: str, program_id: str) -> D
         data = base58.b58decode(instruction_data_base58)
         result = {"program_id": program_id, "raw_data_hex": data.hex()}
 
-        if program_id == SYSTEM_PROGRAM and len(data) >= 4:
+        if program_id == "11111111111111111111111111111111" and len(data) >= 4:
             ix_type = struct.unpack_from("<I", data, 0)[0]
             system_ixs = {0: "CreateAccount", 1: "Assign", 2: "Transfer",
                           3: "CreateAccountWithSeed", 4: "AdvanceNonceAccount",
@@ -465,7 +466,7 @@ async def decode_instruction(instruction_data_base58: str, program_id: str) -> D
                 result["lamports"] = lamports
                 result["sol"] = _lamports_to_sol(lamports)
 
-        elif program_id == TOKEN_PROGRAM and len(data) >= 1:
+        elif program_id == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" and len(data) >= 1:
             ix_type = data[0]
             token_ixs = {0: "InitializeMint", 1: "InitializeAccount", 2: "InitializeMultisig",
                          3: "Transfer", 4: "Approve", 5: "Revoke", 6: "SetAuthority",
@@ -477,7 +478,7 @@ async def decode_instruction(instruction_data_base58: str, program_id: str) -> D
                 amount = struct.unpack_from("<Q", data, 1)[0]
                 result["amount"] = amount
 
-        elif program_id == COMPUTE_BUDGET_PROGRAM and len(data) >= 1:
+        elif program_id == "ComputeBudget111111111111111111111111111111" and len(data) >= 1:
             ix_type = data[0]
             if ix_type == 2 and len(data) >= 5:
                 result["instruction_name"] = "SetComputeUnitLimit"
@@ -488,7 +489,7 @@ async def decode_instruction(instruction_data_base58: str, program_id: str) -> D
             else:
                 result["instruction_name"] = f"ComputeBudget({ix_type})"
 
-        elif program_id == MEMO_PROGRAM:
+        elif program_id == "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr":
             result["instruction_name"] = "Memo"
             result["memo_text"] = data.decode("utf-8", errors="replace")
 
@@ -976,7 +977,7 @@ async def get_address_lookup_table(address: str) -> Dict[str, Any]:
         if acct is None:
             return _err(f"Address lookup table {address} not found")
 
-        if str(acct.owner) != ALT_PROGRAM:
+        if str(acct.owner) != "AddressLookupTab1e1111111111111111111111111":
             return _err(f"Account {address} is not an address lookup table (owner: {acct.owner})")
 
         data = bytes(acct.data)
