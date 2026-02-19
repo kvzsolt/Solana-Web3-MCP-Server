@@ -14,9 +14,8 @@ dependencies = [
 ]
 
 [project.scripts]
-web3-mcp = "server:main"
+web3-mcp = "web3_mcp_server:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-

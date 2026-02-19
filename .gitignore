@@ -35,6 +35,7 @@ data/
 .vscode/
 *.iml
 .qodo/
+.proxyai/
 
 # OS
 .DS_Store

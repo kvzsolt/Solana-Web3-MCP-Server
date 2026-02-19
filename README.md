@@ -33,6 +33,8 @@ Built with [FastMCP](https://github.com/jlowin/fastmcp) and the [solana-py](http
 
 ## Installation
 
+### Option 1: With pip
+
 ```bash
 git clone https://github.com/kvzsolt/Web3js-MCP-Server.git
 cd Web3js-MCP-Server
@@ -45,11 +47,16 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Or with `uv`:
+### Option 2: With uv (recommended — faster!)
 
 ```bash
-uv venv && source .venv/bin/activate
-uv pip install -r requirements.txt
+git clone https://github.com/kvzsolt/Web3js-MCP-Server.git
+cd Web3js-MCP-Server
+
+# Create venv and install from pyproject.toml
+uv venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+uv pip install -e .
 ```
 
 ---
@@ -58,8 +65,16 @@ uv pip install -r requirements.txt
 
 ### Run the server (stdio transport — default for MCP)
 
+**If installed with pip:**
 ```bash
-python server.py
+python mcp-server.py
+```
+
+**If installed with uv:**
+```bash
+web3-mcp
+# or
+python mcp-server.py
 ```
 
 ### Connect via Claude Desktop
@@ -71,7 +86,19 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "solana-web3": {
       "command": "python",
-      "args": ["/absolute/path/to/Web3js-MCP-Server/server.py"]
+      "args": ["/absolute/path/to/Web3js-MCP-Server/mcp-server.py"]
+    }
+  }
+}
+```
+
+Or if you installed with `uv` and the `web3-mcp` script is in your PATH:
+
+```json
+{
+  "mcpServers": {
+    "solana-web3": {
+      "command": "/absolute/path/to/Web3js-MCP-Server/.venv/bin/web3-mcp"
     }
   }
 }
@@ -91,7 +118,7 @@ To use a custom RPC endpoint (e.g. Helius, QuickNode, Triton), set the environme
 
 ```bash
 export RPC_ENDPOINT="https://your-rpc-endpoint.com"
-python server.py
+python mcp-server.py
 ```
 
 Or create a `.env` file in the project root:
@@ -108,9 +135,12 @@ RPC_ENDPOINT=https://your-rpc-endpoint.com
 
 ```
 Web3js-MCP-Server/
-├── server.py           # Main MCP server — all tools defined here
-├── pyproject.toml      # Project metadata & dependencies
-├── requirements.txt    # Pinned dependencies for pip
+├── mcp-server.py         # Main MCP server — all tools defined here
+├── web3_mcp_server.py    # Entry point wrapper for CLI script
+├── pyproject.toml        # Project metadata & dependencies
+├── requirements.txt      # Pinned dependencies for pip
+├── .gitignore            # Git ignore rules
+├── .env.example          # Template for environment variables
 └── README.md
 ```
 
