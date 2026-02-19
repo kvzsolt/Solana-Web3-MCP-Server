@@ -29,7 +29,7 @@ logs/
 
 # Data / runtime artifacts
 data/
-
+.venv
 # IDE / editor
 .idea/
 .vscode/

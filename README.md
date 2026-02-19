@@ -30,15 +30,15 @@ A **Model Context Protocol (MCP)** server that exposes a basic set of Solana blo
 
 ## Installation
 
-### Option 1: With pip
+### Option 1: With uv
 
 ```bash
 git clone https://github.com/kvzsolt/Web3js-MCP-Server.git
 cd Web3js-MCP-Server
-# Create venv and install from pyproject.toml
 uv venv
 source .venv/bin/activate
 uv pip install -e .
+
 ```
 
 ---
@@ -130,4 +130,4 @@ MIT
 - [ ] Add environment-specific configs (mainnet, devnet, testnet)
 - [ ] Add graceful shutdown handling
 
-
+### Contributions are welcome!
