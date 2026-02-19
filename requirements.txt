@@ -1,4 +1,4 @@
-fastmcp>=3.0.0
+sufastmcp>=3.0.0
 mcp>=1.0.0
 solana>=0.36.0
 solders>=0.27.0
