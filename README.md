@@ -1,11 +1,8 @@
 # Solana Web3 MCP Server
 
-A **Model Context Protocol (MCP)** server that exposes a comprehensive set of Solana blockchain tools to any MCP-compatible AI client (Claude Desktop, Cursor, etc.).
-
-Built with [FastMCP](https://github.com/jlowin/fastmcp) and the [solana-py](https://github.com/michaelhly/solana-py) RPC client.
+A **Model Context Protocol (MCP)** server that exposes a basic set of Solana blockchain tools to any MCP-compatible AI client (Claude Desktop, Cursor, etc.)
 
 ---
-
 ## Features
 
 | Category | Tools |
@@ -38,24 +35,9 @@ Built with [FastMCP](https://github.com/jlowin/fastmcp) and the [solana-py](http
 ```bash
 git clone https://github.com/kvzsolt/Web3js-MCP-Server.git
 cd Web3js-MCP-Server
-
-# Create and activate a virtual environment
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### Option 2: With uv (recommended — faster!)
-
-```bash
-git clone https://github.com/kvzsolt/Web3js-MCP-Server.git
-cd Web3js-MCP-Server
-
 # Create venv and install from pyproject.toml
 uv venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 uv pip install -e .
 ```
 
@@ -64,11 +46,6 @@ uv pip install -e .
 ## Usage
 
 ### Run the server (stdio transport — default for MCP)
-
-**If installed with pip:**
-```bash
-python mcp-server.py
-```
 
 **If installed with uv:**
 ```bash
@@ -81,18 +58,8 @@ python mcp-server.py
 
 Add to your `claude_desktop_config.json`:
 
-```json
-{
-  "mcpServers": {
-    "solana-web3": {
-      "command": "python",
-      "args": ["/absolute/path/to/Web3js-MCP-Server/mcp-server.py"]
-    }
-  }
-}
-```
 
-Or if you installed with `uv` and the `web3-mcp` script is in your PATH:
+You installed with `uv` and the `web3-mcp` script is in your PATH:
 
 ```json
 {
@@ -108,29 +75,6 @@ Or if you installed with `uv` and the `web3-mcp` script is in your PATH:
 
 ## Configuration
 
-By default the server connects to the **Solana Mainnet** public RPC endpoint:
-
-```
-https://api.mainnet-beta.solana.com
-```
-
-To use a custom RPC endpoint (e.g. Helius, QuickNode, Triton), set the environment variable before starting the server:
-
-```bash
-export RPC_ENDPOINT="https://your-rpc-endpoint.com"
-python mcp-server.py
-```
-
-Or create a `.env` file in the project root:
-
-```env
-RPC_ENDPOINT=https://your-rpc-endpoint.com
-```
-
-> **Note:** `.env` files are ignored by git. Never commit your private RPC URLs or API keys.
-
----
-
 ## Project Structure
 
 ```
@@ -138,9 +82,7 @@ Web3js-MCP-Server/
 ├── mcp-server.py         # Main MCP server — all tools defined here
 ├── web3_mcp_server.py    # Entry point wrapper for CLI script
 ├── pyproject.toml        # Project metadata & dependencies
-├── requirements.txt      # Pinned dependencies for pip
 ├── .gitignore            # Git ignore rules
-├── .env.example          # Template for environment variables
 └── README.md
 ```
 
@@ -149,4 +91,43 @@ Web3js-MCP-Server/
 ## License
 
 MIT
+
+## Todos
+
+### Features
+- [ ] Add transaction building and sending tools (`send_transaction`, `build_transfer`, `build_token_transfer`)
+- [ ] Add support for Metaplex NFT operations (fetch metadata, get collection info)
+- [ ] Add Jupiter swap execution (currently only has quote fetching)
+- [ ] Add WebSocket subscription tools for real-time updates
+- [ ] Add support for compressed NFTs (cNFTs)
+- [ ] Add Pyth price feed integration
+
+### Improvements
+- [ ] Add caching layer for frequently requested data (token metadata, account info)
+- [ ] Add retry logic with exponential backoff for RPC calls
+- [ ] Add request rate limiting to avoid RPC endpoint throttling
+- [ ] Add logging with configurable verbosity levels
+- [ ] Add health check endpoint for server monitoring
+- [ ] Add tool execution metrics and performance tracking
+
+### Testing & Quality
+- [ ] Add unit tests for all tools
+- [ ] Add integration tests with devnet
+- [ ] Add CI/CD pipeline (GitHub Actions)
+- [ ] Add code coverage reporting
+- [ ] Add linting and formatting checks (ruff, black)
+
+### Documentation
+- [ ] Add examples for each tool in README
+- [ ] Add troubleshooting section
+- [ ] Add video tutorial or GIF demo
+- [ ] Add API documentation with tool parameters and return types
+- [ ] Document common use cases (wallet analysis, token research, etc.)
+
+### DevOps
+- [ ] Add Docker support
+- [ ] Add support for multiple RPC endpoints with failover
+- [ ] Add environment-specific configs (mainnet, devnet, testnet)
+- [ ] Add graceful shutdown handling
+
 

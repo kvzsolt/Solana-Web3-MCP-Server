@@ -20,14 +20,6 @@ load_dotenv()
 
 LAMPORTS_PER_SOL = 1_000_000_000
 
-TOKEN_PROGRAM        = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-TOKEN_2022_PROGRAM   = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
-SYSTEM_PROGRAM       = "11111111111111111111111111111111"
-COMPUTE_BUDGET_PROGRAM = "ComputeBudget111111111111111111111111111111"
-MEMO_PROGRAM         = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
-METAPLEX_METADATA_PROGRAM = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
-ALT_PROGRAM          = "AddressLookupTab1e1111111111111111111111111"
-
 # RPC Client — override via RPC_ENDPOINT env var or .env file
 RPC_ENDPOINT = os.getenv("RPC_ENDPOINT", "https://api.mainnet-beta.solana.com")
 client = Client(RPC_ENDPOINT, commitment=Confirmed)
@@ -35,10 +27,6 @@ client = Client(RPC_ENDPOINT, commitment=Confirmed)
 # Initialize MCP server
 mcp = FastMCP("Solana Web3 Tools")
 
-
-# ============================================================================
-# HELPERS
-# ============================================================================
 
 def _ok(data: Any, **extra) -> Dict[str, Any]:
     """Wrap a successful result."""
