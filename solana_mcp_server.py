@@ -47,11 +47,6 @@ def _pubkey(addr: str) -> Pubkey:
 def _lamports_to_sol(lamports: int) -> float:
     return lamports / LAMPORTS_PER_SOL
 
-
-# ============================================================================
-# ACCOUNT & BALANCE OPERATIONS
-# ============================================================================
-
 @mcp.tool()
 async def get_balance(address: str) -> Dict[str, Any]:
     """Get SOL balance for an address in lamports and SOL."""
@@ -96,23 +91,25 @@ async def get_token_accounts(owner: str, mint: Optional[str] = None) -> Dict[str
         if mint:
             from solana.rpc.types import TokenAccountOpts
             opts = TokenAccountOpts(mint=_pubkey(mint))
-            resp = client.get_token_accounts_by_owner(owner_pk, opts)
+            resp = client.get_token_accounts_by_owner_json_parsed(owner_pk, opts)
         else:
             from solana.rpc.types import TokenAccountOpts
             opts = TokenAccountOpts(program_id=_pubkey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"))
-            resp = client.get_token_accounts_by_owner(owner_pk, opts)
+            resp = client.get_token_accounts_by_owner_json_parsed(owner_pk, opts)
 
         accounts = []
         for item in resp.value:
             parsed = item.account.data.parsed
             info = parsed["info"]
+            token_amount = info["tokenAmount"]
             accounts.append({
                 "pubkey": str(item.pubkey),
                 "mint": info["mint"],
                 "owner": info["owner"],
-                "amount": info["tokenAmount"]["uiAmountString"],
-                "decimals": info["tokenAmount"]["decimals"],
-                "ui_amount": info["tokenAmount"]["uiAmount"],
+                "amount": token_amount["amount"],
+                "decimals": token_amount["decimals"],
+                "ui_amount": token_amount["uiAmount"],
+                "ui_amount_string": token_amount["uiAmountString"],
             })
         return _ok(accounts, count=len(accounts))
     except Exception as e:
@@ -263,23 +260,6 @@ async def get_latest_blockhash() -> Dict[str, Any]:
     except Exception as e:
         return _err(str(e), type(e).__name__)
 
-
-@mcp.tool()
-async def is_blockhash_valid(blockhash: str) -> Dict[str, Any]:
-    """Check if a blockhash is still valid. Useful before submitting transactions."""
-    try:
-        from solders.hash import Hash as SoldersHash
-        bh = SoldersHash.from_string(blockhash)
-        resp = client.is_blockhash_valid(bh)
-        return _ok({"blockhash": blockhash, "valid": resp.value})
-    except Exception as e:
-        return _err(str(e), type(e).__name__)
-
-
-# ============================================================================
-# TOKEN & MINT OPERATIONS
-# ============================================================================
-
 @mcp.tool()
 async def get_token_supply(mint: str) -> Dict[str, Any]:
     """Get total supply for a token mint."""
@@ -406,11 +386,6 @@ async def decode_token_metadata(mint: str) -> Dict[str, Any]:
     except Exception as e:
         return _err(str(e), type(e).__name__)
 
-
-# ============================================================================
-# PROGRAM OPERATIONS
-# ============================================================================
-
 @mcp.tool()
 async def get_program_accounts(
     program_id: str,
@@ -502,13 +477,12 @@ async def decode_instruction(instruction_data_base58: str, program_id: str) -> D
 async def fetch_anchor_idl(program_id: str) -> Dict[str, Any]:
     """Fetch Anchor IDL stored on-chain for a program (IDL account at deterministic PDA)."""
     try:
-        # Anchor IDL PDA: seeds = ["anchor:idl", program_id]
-        base = Pubkey.find_program_address(
-            [b"anchor:idl", bytes(_pubkey(program_id))],
-            _pubkey(program_id),
-        )[0]
+        program_pk = _pubkey(program_id)
+        # Anchor derives IDL accounts as create_with_seed(find_program_address([], program_id), "anchor:idl", program_id).
+        base = Pubkey.find_program_address([], program_pk)[0]
+        idl_address = Pubkey.create_with_seed(base, "anchor:idl", program_pk)
 
-        resp = client.get_account_info(base)
+        resp = client.get_account_info(idl_address)
         acct = resp.value
         if acct is None:
             return _err(f"No Anchor IDL found on-chain for program {program_id}")
@@ -536,16 +510,12 @@ async def fetch_anchor_idl(program_id: str) -> Dict[str, Any]:
 
         return _ok({
             "program_id": program_id,
+            "idl_address": str(idl_address),
             "authority": authority,
             "idl": idl,
         })
     except Exception as e:
         return _err(str(e), type(e).__name__)
-
-
-# ============================================================================
-# DEX & DEFI OPERATIONS (via HTTP APIs)
-# ============================================================================
 
 @mcp.tool()
 async def get_jupiter_quote(
@@ -558,7 +528,7 @@ async def get_jupiter_quote(
     try:
         async with httpx.AsyncClient(timeout=15) as http:
             resp = await http.get(
-                "https://quote-api.jup.ag/v6/quote",
+                "https://lite-api.jup.ag/swap/v1/quote",
                 params={
                     "inputMint": input_mint,
                     "outputMint": output_mint,
@@ -591,51 +561,23 @@ async def get_token_price(mints: str) -> Dict[str, Any]:
     try:
         async with httpx.AsyncClient(timeout=10) as http:
             resp = await http.get(
-                "https://api.jup.ag/price/v2",
+                "https://lite-api.jup.ag/price/v3",
                 params={"ids": mints},
             )
             resp.raise_for_status()
             data = resp.json()
 
         prices = {}
-        for mint_addr, info in data.get("data", {}).items():
+        for mint_addr, info in data.items():
             prices[mint_addr] = {
-                "id": info.get("id"),
-                "type": info.get("type"),
-                "price": info.get("price"),
+                "id": mint_addr,
+                "price": info.get("usdPrice"),
+                "decimals": info.get("decimals"),
+                "liquidity": info.get("liquidity"),
+                "price_change_24h": info.get("priceChange24h"),
+                "block_id": info.get("blockId"),
             }
         return _ok(prices, count=len(prices))
-    except Exception as e:
-        return _err(str(e), type(e).__name__)
-
-
-@mcp.tool()
-async def get_raydium_pools(token_mint: Optional[str] = None) -> Dict[str, Any]:
-    """Get Raydium AMM pool information from their API. Optionally filter by token mint."""
-    try:
-        async with httpx.AsyncClient(timeout=15) as http:
-            params = {}
-            if token_mint:
-                params["mint"] = token_mint
-            resp = await http.get(
-                "https://api-v3.raydium.io/pools/info/list",
-                params={**params, "pageSize": 10, "page": 1},
-            )
-            resp.raise_for_status()
-            data = resp.json()
-
-        pools = []
-        for pool in data.get("data", {}).get("data", []):
-            pools.append({
-                "id": pool.get("id"),
-                "type": pool.get("type"),
-                "mint_a": pool.get("mintA", {}).get("address"),
-                "mint_b": pool.get("mintB", {}).get("address"),
-                "tvl": pool.get("tvl"),
-                "volume_24h": pool.get("day", {}).get("volume"),
-                "apr_24h": pool.get("day", {}).get("apr"),
-            })
-        return _ok(pools, count=len(pools))
     except Exception as e:
         return _err(str(e), type(e).__name__)
 
@@ -671,10 +613,6 @@ async def get_orca_whirlpools(token_a: Optional[str] = None, token_b: Optional[s
     except Exception as e:
         return _err(str(e), type(e).__name__)
 
-
-# ============================================================================
-# UTILITY OPERATIONS
-# ============================================================================
 
 @mcp.tool()
 async def validate_address(address: str) -> Dict[str, Any]:
@@ -917,26 +855,6 @@ async def get_recent_priority_fees(addresses: Optional[List[str]] = None) -> Dic
         return _err(str(e), type(e).__name__)
 
 
-# ============================================================================
-# STAKE & VOTE (NEW — from scraped docs)
-# ============================================================================
-
-@mcp.tool()
-async def get_stake_activation(stake_account: str) -> Dict[str, Any]:
-    """Get stake activation status for a stake account."""
-    try:
-        resp = client.get_stake_activation(_pubkey(stake_account))
-        val = resp.value
-        return _ok({
-            "stake_account": stake_account,
-            "state": str(val.state),
-            "active": val.active,
-            "inactive": val.inactive,
-        })
-    except Exception as e:
-        return _err(str(e), type(e).__name__)
-
-
 @mcp.tool()
 async def get_vote_accounts() -> Dict[str, Any]:
     """Get current and delinquent vote accounts (validators)."""
@@ -963,10 +881,6 @@ async def get_vote_accounts() -> Dict[str, Any]:
     except Exception as e:
         return _err(str(e), type(e).__name__)
 
-
-# ============================================================================
-# ADDRESS LOOKUP TABLE (NEW — from Kit compressTransactionMessageUsingAddressLookupTables)
-# ============================================================================
 
 @mcp.tool()
 async def get_address_lookup_table(address: str) -> Dict[str, Any]:
@@ -1008,11 +922,6 @@ async def get_address_lookup_table(address: str) -> Dict[str, Any]:
     except Exception as e:
         return _err(str(e), type(e).__name__)
 
-
-# ============================================================================
-# COMPOSITE / CONVENIENCE TOOLS (NEW — discovered from analyzing docs)
-# ============================================================================
-
 @mcp.tool()
 async def resolve_token_info(mint: str) -> Dict[str, Any]:
     """All-in-one: get mint details, metadata, supply, and current price for a token."""
@@ -1020,22 +929,22 @@ async def resolve_token_info(mint: str) -> Dict[str, Any]:
         result: Dict[str, Any] = {"mint": mint}
 
         # Mint info
-        mint_data = await get_mint_info.fn(mint)
+        mint_data = await get_mint_info(mint)
         if mint_data["success"]:
             result["mint_info"] = mint_data["data"]
 
         # Metadata
-        meta_data = await decode_token_metadata.fn(mint)
+        meta_data = await decode_token_metadata(mint)
         if meta_data["success"]:
             result["metadata"] = meta_data["data"]
 
         # Supply
-        supply_data = await get_token_supply.fn(mint)
+        supply_data = await get_token_supply(mint)
         if supply_data["success"]:
             result["supply"] = supply_data["data"]
 
         # Price
-        price_data = await get_token_price.fn(mint)
+        price_data = await get_token_price(mint)
         if price_data["success"]:
             result["price"] = price_data["data"].get(mint)
 
@@ -1051,18 +960,18 @@ async def get_wallet_overview(address: str) -> Dict[str, Any]:
         result: Dict[str, Any] = {"address": address}
 
         # SOL balance
-        bal = await get_balance.fn(address)
+        bal = await get_balance(address)
         if bal["success"]:
             result["sol_balance"] = bal["data"]
 
         # Token accounts
-        tokens = await get_token_accounts.fn(address)
+        tokens = await get_token_accounts(address)
         if tokens["success"]:
             result["token_accounts"] = tokens["data"][:20]  # limit to 20
             result["token_count"] = tokens.get("count", 0)
 
         # Recent transactions
-        sigs = await get_signatures_for_address.fn(address, limit=5)
+        sigs = await get_signatures_for_address(address, limit=5)
         if sigs["success"]:
             result["recent_transactions"] = sigs["data"]
 
@@ -1070,10 +979,6 @@ async def get_wallet_overview(address: str) -> Dict[str, Any]:
     except Exception as e:
         return _err(str(e), type(e).__name__)
 
-
-# ============================================================================
-# SERVER STARTUP
-# ============================================================================
 
 def main():
     mcp.run()
