@@ -12,8 +12,6 @@ dependencies = [
     "base58>=2.1.1",
     "httpx>=0.28.0",
     "python-dotenv>=1.0.0",
-    "pydantic>=2.0.0",
-    "anyio>=4.0.0",
 ]
 [project.scripts]
 web3-mcp = "web3_mcp_server:main"
@@ -24,4 +22,3 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["web3_mcp_server.py", "mcp-server.py"]
-

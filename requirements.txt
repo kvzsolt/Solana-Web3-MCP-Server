@@ -1,10 +1,7 @@
-sufastmcp>=3.0.0
+fastmcp>=3.0.0
 mcp>=1.0.0
 solana>=0.36.0
 solders>=0.27.0
 base58>=2.1.1
 httpx>=0.28.0
 python-dotenv>=1.0.0
-pydantic>=2.0.0
-anyio>=4.0.0
-
