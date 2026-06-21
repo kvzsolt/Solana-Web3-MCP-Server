@@ -796,8 +796,8 @@ async def get_epoch_info() -> Dict[str, Any]:
 async def get_health() -> Dict[str, Any]:
     """Check if the RPC node is healthy."""
     try:
-        resp = client.get_health()
-        return _ok({"healthy": True, "status": str(resp)})
+        is_live = client.is_connected()
+        return _ok({"healthy": is_live, "status": "connected" if is_live else "disconnected"})
     except Exception as e:
         return _ok({"healthy": False, "status": str(e)})
 
