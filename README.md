@@ -33,8 +33,8 @@ A **Model Context Protocol (MCP)** server that exposes Solana blockchain tools t
 ### Option 1: With uv
 
 ```bash
-git clone https://github.com/kvzsolt/Web3js-MCP-Server.git
-cd Web3js-MCP-Server
+git clone https://github.com/kvzsolt/Solana-Web3-MCP-Server.git
+cd Solana-Web3-MCP-Server
 uv venv
 source .venv/bin/activate
 uv sync
@@ -71,7 +71,7 @@ You installed with `uv` and the `web3-mcp` script is in your PATH:
 {
   "mcpServers": {
     "solana-web3": {
-      "command": "/absolute/path/to/Web3js-MCP-Server/.venv/bin/web3-mcp"
+      "command": "/absolute/path/to/Solana-Web3-MCP-Server/.venv/bin/web3-mcp"
     }
   }
 }
@@ -98,7 +98,7 @@ Jupiter quote and price tools use Jupiter's public Lite API endpoints.
 ## Project Structure
 
 ```
-Web3js-MCP-Server/
+Solana-Web3-MCP-Server/
 ├── solana_mcp_server.py  # Main MCP server and CLI entry point
 ├── pyproject.toml        # Project metadata & dependencies
 ├── requirements.txt      # pip-compatible dependency list

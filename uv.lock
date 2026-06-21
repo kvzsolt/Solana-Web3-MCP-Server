@@ -1318,6 +1318,31 @@ wheels = [
 ]
 
 [[package]]
+name = "solana-web3-mcp-server"
+version = "1.0.0"
+source = { editable = "." }
+dependencies = [
+    { name = "base58" },
+    { name = "fastmcp" },
+    { name = "httpx" },
+    { name = "mcp" },
+    { name = "python-dotenv" },
+    { name = "solana" },
+    { name = "solders" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "base58", specifier = ">=2.1.1" },
+    { name = "fastmcp", specifier = ">=3.0.0" },
+    { name = "httpx", specifier = ">=0.28.0" },
+    { name = "mcp", specifier = ">=1.0.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "solana", specifier = ">=0.36.0" },
+    { name = "solders", specifier = ">=0.27.0" },
+]
+
+[[package]]
 name = "solders"
 version = "0.27.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1517,31 +1542,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/27/0b/a54103cfd732bb703c7a749222011a0483ef3705948dae3b203158601119/watchfiles-1.2.0-pp311-pypy311_pp73-macosx_11_0_arm64.whl", hash = "sha256:094b9b70103d4e963499bdea001ee3c2697b144cd9ae6218a62c0f89ec9e31db", size = 396629 },
     { url = "https://files.pythonhosted.org/packages/5e/2c/73f31a3b893886206c3f54d73e8ad8dee58cdb2f69ad2622e0a8a9e07f4e/watchfiles-1.2.0-pp311-pypy311_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b0ef001f8c25ad0fa9529f914c1600647ecd0f542d11c19b7894768c67b6acb7", size = 457318 },
     { url = "https://files.pythonhosted.org/packages/e9/f9/45d021e4a5cc7b9dd567f7cbb06d3b75f751a690063fb6cc7ec60f4e46b7/watchfiles-1.2.0-pp311-pypy311_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a88fc94e647bc4eec523f1caa540258eb71d14278b9daf72fa1e2658a98df0f0", size = 457771 },
-]
-
-[[package]]
-name = "web3js-mcp-server"
-version = "1.0.0"
-source = { editable = "." }
-dependencies = [
-    { name = "base58" },
-    { name = "fastmcp" },
-    { name = "httpx" },
-    { name = "mcp" },
-    { name = "python-dotenv" },
-    { name = "solana" },
-    { name = "solders" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "base58", specifier = ">=2.1.1" },
-    { name = "fastmcp", specifier = ">=3.0.0" },
-    { name = "httpx", specifier = ">=0.28.0" },
-    { name = "mcp", specifier = ">=1.0.0" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "solana", specifier = ">=0.36.0" },
-    { name = "solders", specifier = ">=0.27.0" },
 ]
 
 [[package]]

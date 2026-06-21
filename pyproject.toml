@@ -1,5 +1,5 @@
 [project]
-name = "web3js-mcp-server"
+name = "solana-web3-mcp-server"
 version = "1.0.0"
 description = "A Model Context Protocol (MCP) server exposing Solana Web3 tools for accounts, transactions, tokens, DEX quotes, voting, and more."
 readme = "README.md"
